@@ -13,8 +13,6 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens;
-
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
     use Notifiable;
@@ -29,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'roles_id'
     ];
 
     /**
@@ -44,6 +43,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array<int, string>
@@ -52,16 +60,17 @@ class User extends Authenticatable
         'profile_photo_url',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function role()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        // ฟังก์ชันนี้ใช้ดึงข้อมูล Role ที่เกี่ยวข้องกับ User 1 คน
+        // ผลลัพธ์ที่ได้จะเป็น Eloquent Relationship object
+        return $this->belongsTo(Roles::class, 'roles_id');
+    }
+
+    public function checkRole($roles_code)
+    {
+        // ฟังก์ชันนี้ใช้ตรวจสอบว่า User 1 คนมี Role ตรงกับ $roles_code หรือไม่
+        // ผลลัพธ์ที่ได้จะเป็น boolean (true หรือ false)
+        return strtolower($this->role->roles_code) == strtolower($roles_code);
     }
 }
