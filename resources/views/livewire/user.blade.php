@@ -8,6 +8,7 @@
 
 
     <div class="mb-6 pr-4 pl-4">
+        {--ตรวจสอบจำนวน Rows $user --}
         @if ($users->count() > 0)
 
 

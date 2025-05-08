@@ -20,7 +20,7 @@ class Dishes extends Component
     //     ]);
     // }
 
-  public $search = '';
+    public $search = '';
 
     // public $message = 'helloworld';
 
@@ -35,9 +35,13 @@ class Dishes extends Component
 
 
         return view('livewire.dishes', [
-            'dishes' => ModelsDishes::with('category')->search(['dish_name', 'price','category.category'], $this->search, 'contains', 'or')->paginate(5),
+            // ดึงข้อมูลจากโมเดล ModelsDishes พร้อมกับข้อมูลที่เกี่ยวข้องจากตาราง 'category' ด้วยการใช้ with()
+            'dishes' => ModelsDishes::with('category')
 
+                //เลือกให้ค้นหาตรงแบบ 'contains' หรือ 'or'
+                ->search(['dish_name', 'price', 'category.category'], $this->search, 'contains', 'or')
+
+                ->paginate(5), // แบ่งหน้าแสดงผลข้อมูล dishes 5 รายการต่อหน้า
         ]);
-
     }
 }

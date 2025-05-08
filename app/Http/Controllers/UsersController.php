@@ -11,26 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class UsersController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index()
     {
-        $authUser = Auth::user();
+        $authUser = Auth::user(); // ดึงข้อมูลผู้ใช้ที่ทำการล็อกอินอยู่ในปัจจุบัน
 
-        // if (Gate::allows('view', $authUser)) {
+        // if (Gate::allows('view', $authUser)) { // เช็คสิทธิ์ของผู้ใช้ (ถูกคอมเมนต์ไว้)
 
-            $users = User::with('role')->paginate(5);
-            // dd($users);
-            return view('users.index', compact('users'));
+        $users = User::with('role')->paginate(5); // ดึงข้อมูลผู้ใช้จากฐานข้อมูลพร้อมกับข้อมูลของ role (ความสัมพันธ์ระหว่างตาราง User กับ Role) และแบ่งหน้าแสดงผล 5 คนต่อหน้า
+
+        // dd($users); // ใช้คำสั่ง dd() เพื่อตรวจสอบข้อมูลของ $users (ถูกคอมเมนต์ไว้)
+
+        return view('users.index', compact('users')); // ส่งข้อมูลผู้ใช้ไปยัง view 'users.index' และให้ตัวแปร $users อยู่ใน view ด้วย
         // } else {
-        //     return view('error-access');
+        //     return view('error-access'); // ถ้าผู้ใช้ไม่มีสิทธิ์ จะทำการแสดงหน้า 'error-access' (ถูกคอมเมนต์ไว้)
         // }
     }
-
-
-
-
 
     /**
      * Show the form for creating a new resource.
@@ -68,7 +64,7 @@ class UsersController extends Controller
      */
     public function show(User $user)
     {
-        //  เรียกใช้ Policy (optional)
+
         //  $this->authorize('view', $user);
         return view('users.show', compact('user'));
     }
@@ -78,7 +74,6 @@ class UsersController extends Controller
      */
     public function edit(User $user)
     {
-        //  เรียกใช้ Policy (optional)
         //  $this->authorize('view', $user);
         return view('users.edit', compact('user'));
     }

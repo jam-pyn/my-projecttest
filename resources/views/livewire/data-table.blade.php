@@ -80,8 +80,9 @@
                                 <select name="roles" id="roles"
                                     class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                     disabled>
+
                                     @foreach ($roles as $role)
-                                        <option value="{{ $role->id }}">{{ $role->role_name }}</option>
+                                    <option value="{{ $role->id }}">{{ $role->role_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -92,7 +93,8 @@
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:py-4">
                     <div class="flex flex-row-reverse">
                         <button type="button"
-                            class="btn-sm-update mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            class="btn-sm-update mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                            data-dish="${id}">
                             อัพเดทข้อมูล
                         </button>
                         <button type="button"
@@ -109,70 +111,72 @@
 
 
 @script
-    <script>
-        $(document).ready(function() {
-            console.log("hello");
+<script>
+    $(document).ready(function() {
+        console.log("hello");
 
-            // กำหนด DataTable ให้กับ element `#table-users`
-            var list_table = $('#table-users').DataTable({
-                // กำหนดจำนวน record ที่แสดงต่อหน้าจอ เริ่มต้นที่ 5 record
-                pageLength: 5,
-                // กำหนดให้ datatable ตอบสนองต่อหน้าจอที่มีขนาดต่างกัน
-                responsive: true,
-                // แสดง indicator แถบแสดงสถานะการโหลดข้อมูล
-                processing: true,
-                // เปิดใช้งานการประมวลผลข้อมูลฝั่ง server
-                serverSide: true,
-                // กำหนด method การส่งข้อมูลไปยัง server
-                serverMethod: 'post',
-                // กำหนด URL สำหรับดึงข้อมูล
-                ajax: {
-                    url: '{{ route('user.with.datatable') }}',
+        // กำหนด DataTable ให้กับ element `#table-users`
+        var list_table = $('#table-users').DataTable({
+            dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
+            // กำหนดจำนวน record ที่แสดงต่อหน้าจอ เริ่มต้นที่ 5 record
+            pageLength: 5,
+            // กำหนดให้ datatable ตอบสนองต่อหน้าจอที่มีขนาดต่างกัน
+            responsive: true,
+            // แสดง indicator แถบแสดงสถานะการโหลดข้อมูล
+            processing: true,
+            // เปิดใช้งานการประมวลผลข้อมูลฝั่ง server
+            serverSide: true,
+            // กำหนด method การส่งข้อมูลไปยัง server
+            serverMethod: 'post',
+            // กำหนด URL สำหรับดึงข้อมูล
+            ajax: {
+                url: "{{ route('user.with.datatable') }}",
 
-                    // กำหนด method การส่งข้อมูล
-                    type: "post",
+                // กำหนด method การส่งข้อมูล
+                type: "post",
 
-                    // กำหนด header เพิ่มเติม
-                    beforeSend: function(xhr) {
-                        xhr.setRequestHeader('Authorization',
-                            'Bearer Vd74sxFrv98UJtR3cVlDvd2anjWMDzs12KmYIfbF23148588');
-                    }
+                // กำหนด header เพิ่มเติม
+                beforeSend: function(xhr) {
+                    const bearerToken = "{{ env('TOKEN_API') }}";
+                    xhr.setRequestHeader('Authorization',
+                        'Bearer ' + bearerToken);
+                }
+            },
+            columns: [{
+                    // ดึงข้อมูลของคอลัมน์ 'id' จาก server-side script
+                    data: 'id'
                 },
-                columns: [{
-                        // ดึงข้อมูลของคอลัมน์ 'id' จาก server-side script
-                        data: 'id'
+                {
+                    // ดึงข้อมูลของคอลัมน์ 'name' จาก server-side script
+                    data: 'name'
+                },
+                {
+                    // ดึงข้อมูลของคอลัมน์ 'email' จาก server-side script
+                    // แสดงข้อมูลตามปกติ ไม่ต้องแปลง
+                    data: 'email',
+                    render: function(data, type, row, meta) {
+                        return row.email;
                     },
-                    {
-                        // ดึงข้อมูลของคอลัมน์ 'name' จาก server-side script
-                        data: 'name'
+                    // กำหนด class 'text-center' ให้กับคอลัมน์นี้เพื่อจัดกึ่งกลาง
+                    className: 'text-center'
+                },
+                {
+                    // ดึงข้อมูลของคอลัมน์ 'role' จาก server-side script
+                    // แปลงข้อมูลโดยดึงค่า 'roles_name' จาก object 'role'
+                    data: 'roles_id',
+                    render: function(data, type, row, meta) {
+                        return row.role.role_name;
                     },
-                    {
-                        // ดึงข้อมูลของคอลัมน์ 'email' จาก server-side script
-                        // แสดงข้อมูลตามปกติ ไม่ต้องแปลง
-                        data: 'email',
-                        render: function(data, type, row, meta) {
-                            return row.email;
-                        },
-                        // กำหนด class 'text-center' ให้กับคอลัมน์นี้เพื่อจัดกึ่งกลาง
-                        className: 'text-center'
-                    },
-                    {
-                        // ดึงข้อมูลของคอลัมน์ 'role' จาก server-side script
-                        // แปลงข้อมูลโดยดึงค่า 'roles_name' จาก object 'role'
-                        data: 'roles_id',
-                        render: function(data, type, row, meta) {
-                            return row.role.role_name;
-                        },
-                        // กำหนด class 'text-center' ให้กับคอลัมน์นี้เพื่อจัดกึ่งกลาง
-                        className: 'text-center'
-                    },
-                    {
-                        // ดึงข้อมูลของคอลัมน์ 'id' จาก server-side script
-                        // ไม่ได้ดึงข้อมูลโดยตรง แต่สร้าง HTML button สำหรับการจัดการข้อมูล
-                        data: null,
-                        render: function(data, type, row, meta) {
-                            // สร้าง HTML string สำหรับแสดง button
-                            return `
+                    // กำหนด class 'text-center' ให้กับคอลัมน์นี้เพื่อจัดกึ่งกลาง
+                    className: 'text-center'
+                },
+                {
+                    // ดึงข้อมูลของคอลัมน์ 'id' จาก server-side script
+                    // ไม่ได้ดึงข้อมูลโดยตรง แต่สร้าง HTML button สำหรับการจัดการข้อมูล
+                    data: null,
+                    render: function(data, type, row, meta) {
+                        // สร้าง HTML string สำหรับแสดง button
+                        return `
                                 <div class="flex justify-center">
 
                                         <a class="btn-view btn-actions inline-flex items-center flex-grow px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-wider hover:bg-gray-700 active:bg-gray-900"
@@ -182,7 +186,7 @@
                                         </a>
 
                                         <a class="btn-edit btn-actions inline-flex items-center flex-grow px-4 py-2 ml-4 bg-indigo-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-wider hover:bg-gray-700 active:bg-gray-900"
-                                        >
+                                        data-user='${JSON.stringify(row.id)}'>
                                             {{ __('Edit') }}
                                         </a>
 
@@ -193,276 +197,305 @@
 
                                 </div>
                             `;
-                        },
-                        // กำหนด class 'text-center' ให้กับคอลัมน์นี้เพื่อจัดกึ่งกลาง
-                        className: 'text-center'
                     },
-                ],
-                // กำหนดค่าคอลัมน์ต่างๆ
-                columnDefs: [
+                    // กำหนด class 'text-center' ให้กับคอลัมน์นี้เพื่อจัดกึ่งกลาง
+                    className: 'text-center'
+                },
+            ],
+            // กำหนดค่าคอลัมน์ต่างๆ
+            columnDefs: [
 
-                    // กำหนดให้คอลัมน์ 0, 1, 2 responsive มากที่สุด
-                    {
-                        responsivePriority: 1,
-                        targets: [0, 1, 2]
-                    },
+                // กำหนดให้คอลัมน์ 0, 1, 2 responsive มากที่สุด
+                {
+                    responsivePriority: 1,
+                    targets: [0, 1, 2]
+                },
 
-                    // กำหนดให้คอลัมน์ 1 และ 2 เรียงลำดับได้
-                    {
-                        orderable: true,
-                        targets: [1, 2]
-                    },
+                // กำหนดให้คอลัมน์ 1 และ 2 เรียงลำดับได้
+                {
+                    orderable: true,
+                    targets: [1, 2]
+                },
 
-                    // กำหนดให้คอลัมน์สุดท้าย (คอลัมน์ 3) ไม่เรียงลำดับ
-                    {
-                        orderable: false,
-                        targets: [4]
-                    }
-                ],
-
-                // กำหนดตัวเลือกจำนวน record ที่แสดงต่อหน้าจอ
-                "lengthMenu": [5, 10, 20, 40],
-            });
-
-            $(document).on('click', '.btn-view', function() {
-
-                var data = $(this).data('data');
-                console.log('เข้าถึง Row ทั้งหมด ที่ส่งมาจาก attribute row data');
-                console.log(data);
-                console.log('---------------------------------------------------------------------------');
-
-                var rows = list_table.rows().data();
-                console.log('เข้าถึง Row ทั้งหมด');
-                console.log(rows);
-                console.log('---------------------------------------------------------------------------');
-
-                var row = list_table.row($(this).parents('tr')).data();
-                console.log('เข้าถึง Row ของปุ่มที่ทำการคลิก');
-                console.log(row);
-                console.log('---------------------------------------------------------------------------');
-
-                var rowIndex = list_table.row($(this).parents('tr')).index();
-                console.log('เข้าถึงตำแหน่งของ Row ของปุ่มที่ทำการคลิก');
-                console.log(rowIndex);
-                console.log('---------------------------------------------------------------------------');
-
-                // เติมข้อมูลลงใน Modal
-                $('#name').val(row.name);
-                $('#email').val(row.email);
-                $('#roles').val(row.roles);
-
-                // ตรวจสอบว่า row.roles ว่างหรือไม่
-                if (!row.role || row.role === 'undefined' || row.role === null) {
-                    // Clear Select
-                    $('#roles').val('').trigger('change');
-                } else {
-                    // เลือก option ที่มี value ตรงกับ row.id
-                    $('#roles').val(row.role.id).trigger('change');
+                // กำหนดให้คอลัมน์สุดท้าย (คอลัมน์ 3) ไม่เรียงลำดับ
+                {
+                    orderable: false,
+                    targets: [4]
                 }
+            ],
 
-                // แสดง Modal
-                $('#modal-view').show();
-            });
-
-
-            $(document).on('click', '.btn-edit', function() {
-
-                console.log('ปุ่มอัพเดทถูกคลิก');
-                var row = list_table.rows().data();
-                var row = list_table.row($(this).parents('tr')).data();
-                var rowIndex = list_table.row($(this).parents('tr')).index();
-
-                // เติมข้อมูลลงใน Modal
-
-                $('#name').val(row.name);
-                $('#email').val(row.email);
-                $('#roles').val(row.role);
-
-                // ตรวจสอบว่า row.roles ว่างหรือไม่
-                if (!row.role || row.role === 'undefined' || row.role === null) {
-                    // Clear Select
-                    $('#roles').val('').trigger('change');
-                } else {
-                    // เลือก option ที่มี value ตรงกับ row.id
-                    $('#roles').val(row.role.id).trigger('change');
-                }
-
-                // เปิดการใช้งาน (enable) dropdown หรือ input ที่มี id="roles"
-                // โดยตั้งค่า property 'disabled' ให้เป็น false
-                $('#roles').prop('disabled', false);
-
-                // กำหนดค่า data attribute ชื่อ 'user' ให้กับปุ่มที่มี class 'btn-sm-update'
-                // โดยใช้ค่า ID ของผู้ใช้จาก row.id เพื่อเก็บไว้ใช้งานภายหลัง เช่น สำหรับการอัปเดตข้อมูล
-                $('.btn-sm-update').data('id', row.id);
-                // แสดง Modal
-                $('#modal-view').show();
-            });
-
-
-
-            // $(document).on('click', '.btn-sm-update', function() {
-            //     console.log("ปุ่มอัปเดตถูกคลิก");
-            //     var userId = $(this).data('id');
-            //     const name = document.getElementById('name').value;
-            //     const email = document.getElementById('email').value;
-            //     const roles = document.getElementById('roles').value;
-            //     Swal.fire({
-            //         title: "ยืนยันการอัพเดทข้อมูล",
-            //         text: "คุณต้องการอัพเดทข้อมูลผู้ใช้" + name + ' ใช่หรือไม่ ?',
-            //         icon: "warning",
-            //         showCancelButton: true,
-            //         confirmButtonColor: '#3085d6',
-            //         cancleButtonColor: '#d33',
-            //         confirmButtonText: 'ยืนยัน',
-            //         cancleButtonColor: 'ยกเลิก',
-            //     }).then((result) => {
-            //         if (result.isConfirmed) {
-            //             $.ajax({
-            //                 type: "put",
-            //                 url: "{{ route('user.update') }}",
-            //                 data: {
-            //                     name: name,
-            //                     email: email,
-            //                     roles_id: roles,
-            //                     userId: id,
-
-            //                 },
-            //                 dataType: 'JSON',
-            //                 headers: {},
-            //                 success: function(response) {
-            //                     if (response.code == 200) {
-            //                         Swal.fire({
-
-            //                             title: response.message,
-            //                             text: "ข้อมูลผู้ใช้" +
-            //                                 name + ' ได้รับการอัพเดทแล้ว ?',
-            //                             icon: "success",
-            //                         });
-            //                         list_table.clear().draw();
-            //                     } else {
-            //                         Swal.fire({
-
-            //                             title: 'เกิดข้อผิดพลาด',
-            //                             text: response.message,
-            //                             icon: "error",
-            //                             confirmButtonText: 'ตกลง',
-            //                         });
-            //                     }
-            //                 }
-            //             })
-            //         }
-            //     });
-            // });
-
-            $(document).on('click', '.btn-sm-update', function() {
-                var userId = $(this).data('id'); // ID ของผู้ใช้
-                var name = $('#name').val();
-                var email = $('#email').val();
-                var roleId = $('#roles').val();
-
-                $.ajax({
-                    url: `/users/${userId}`, // แก้ตาม route update ของคุณ เช่น route('users.update', userId)
-                    type: 'PUT', // หรือ 'PATCH' แล้วแต่ Laravel route คุณกำหนด
-                    data: {
-                        name: name,
-                        email: email,
-                        roles_id: roleId,
-                        _token: '{{ csrf_token() }}' // สำคัญ! สำหรับ Laravel
-                    },
-                    success: function(response) {
-                        // ซ่อน modal
-                        $('#modal-view').hide();
-
-                        // รีเฟรชตาราง
-                        $('#table-users').DataTable().ajax.reload(null, false);
-
-                        // แสดง SweetAlert สำหรับการอัพเดทสำเร็จ
-                        Swal.fire({
-                            title: 'อัพเดทข้อมูลสำเร็จ',
-                            text: 'ข้อมูลผู้ใช้ ' + name + ' ได้รับการอัพเดทแล้ว!',
-                            icon: 'success',
-                            confirmButtonText: 'ตกลง'
-                        });
-                    },
-                    error: function(xhr) {
-                        if (xhr.status !== 200) {
-                            var response = xhr.responseJSON || xhr.responseText;
-                            console.log(response);
-
-                            // แสดง SweetAlert สำหรับข้อผิดพลาด
-                            Swal.fire({
-                                title: 'เกิดข้อผิดพลาด',
-                                text: response.message || 'ไม่สามารถอัพเดทข้อมูลได้',
-                                icon: 'error',
-                                confirmButtonText: 'ตกลง'
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'อัพเดทข้อมูลสำเร็จ',
-                                text: 'ข้อมูลผู้ใช้ ' + name + ' ได้รับการอัพเดทแล้ว!',
-                                icon: 'success',
-                                confirmButtonText: 'ตกลง'
-                            });
-                        }
-                    }
-                });
-            });
-
-
-            $(document).on('click', '.btn-delete', function() {
-                console.log("ปุ่มลบถูกคลิก");
-                var row = list_table.row($(this).parents('tr')).data()
-                var userId = row.id;
-
-                Swal.fire({
-                    title: "ยืนยันการลบข้อมูล",
-                    text: "คุณต้องการลบข้อมูลผู้ใช้" + userId + ' ใช่หรือไม่ ?',
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancleButtonColor: '#d33',
-                    confirmButtonText: 'ยืนยัน',
-                    cancleButtonColor: 'ยกเลิก',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            type: "delete",
-                            url: "{{ route('user.delete') }}",
-                            data: {
-
-                                userId: userId,
-                            },
-                            dataType: 'JSON',
-                            headers: {},
-                            success: function(response) {
-                                if (response.code == 200) {
-                                    Swal.fire({
-
-                                        title: response.message,
-                                        text: "ข้อมูลผู้ใช้" +
-                                            userId + ' ได้รับการลบแล้ว ?',
-                                        icon: "success",
-                                    });
-                                    list_table.clear().draw();
-                                } else {
-                                    Swal.fire({
-
-                                        title: 'เกิดข้อผิดพลาด',
-                                        text: response.message,
-                                        icon: "error",
-                                        confirmButtonText: 'ตกลง',
-                                    });
-                                }
-                            }
-                        })
-                    }
-                });
-            });
-
-            $(document).on('click', '#modal-view button', function() {
-                $('#modal-view').hide();
-            });
-
+            // กำหนดตัวเลือกจำนวน record ที่แสดงต่อหน้าจอ
+            "lengthMenu": [5, 10, 20, 40],
         });
-    </script>
+
+        $(document).on('click', '.btn-view', function() {
+
+            var data = $(this).data('data');
+            console.log('เข้าถึง Row ทั้งหมด ที่ส่งมาจาก attribute row data');
+            console.log(data);
+            console.log('---------------------------------------------------------------------------');
+
+            var rows = list_table.rows().data();
+            console.log('เข้าถึง Row ทั้งหมด');
+            console.log(rows);
+            console.log('---------------------------------------------------------------------------');
+
+            var row = list_table.row($(this).parents('tr')).data();
+            console.log('เข้าถึง Row ของปุ่มที่ทำการคลิก');
+            console.log(row);
+            console.log('---------------------------------------------------------------------------');
+
+            var rowIndex = list_table.row($(this).parents('tr')).index();
+            console.log('เข้าถึงตำแหน่งของ Row ของปุ่มที่ทำการคลิก');
+            console.log(rowIndex);
+            console.log('---------------------------------------------------------------------------');
+
+            // เติมข้อมูลลงใน Modal
+            $('#name').val(row.name);
+            $('#email').val(row.email);
+            $('#roles').val(row.roles);
+
+            // ตรวจสอบว่า row.roles ว่างหรือไม่
+            if (!row.role || row.role === 'undefined' || row.role === null) {
+                // Clear Select
+                $('#roles').val('').trigger('change');
+            } else {
+                // เลือก option ที่มี value ตรงกับ row.id
+                $('#roles').val(row.role.id).trigger('change');
+            }
+
+            // แสดง Modal
+            $('#modal-view').show();
+        });
+
+
+        $(document).on('click', '.btn-edit', function() {
+
+            console.log('ปุ่มอัพเดทถูกคลิก');
+            var row = list_table.rows().data();
+            var row = list_table.row($(this).parents('tr')).data();
+            var rowIndex = list_table.row($(this).parents('tr')).index();
+
+            // เติมข้อมูลลงใน Modal
+
+            $('#name').val(row.name);
+            $('#email').val(row.email);
+            $('#roles').val(row.role);
+
+            // ตรวจสอบว่า row.roles ว่างหรือไม่
+            if (!row.role || row.role === 'undefined' || row.role === null) {
+                // Clear Select
+                $('#roles').val('').trigger('change');
+            } else {
+                // เลือก option ที่มี value ตรงกับ row.id
+                $('#roles').val(row.role.id).trigger('change');
+            }
+
+            // เปิดการใช้งาน (enable) dropdown หรือ input ที่มี id="roles"
+            // โดยตั้งค่า property 'disabled' ให้เป็น false
+            $('#roles').prop('disabled', false);
+
+            // กำหนดค่า data attribute ชื่อ 'user' ให้กับปุ่มที่มี class 'btn-sm-update'
+            // โดยใช้ค่า ID ของผู้ใช้จาก row.id เพื่อเก็บไว้ใช้งานภายหลัง เช่น สำหรับการอัปเดตข้อมูล
+            $('.btn-sm-update').data('user', row.id);
+            // แสดง Modal
+            $('#modal-view').show();
+        });
+
+
+
+        // เมื่อมีการคลิกที่ปุ่มที่มีคลาส .btn-sm-update (ปุ่มอัปเดต)
+        $(document).on('click', '.btn-sm-update', function() {
+
+            console.log("ปุ่มอัปเดตถูกคลิก"); // แสดงข้อความใน console ว่าปุ่มถูกคลิก
+
+            // ดึงค่า userId จาก data-user ของปุ่มที่ถูกคลิก
+            var userId = $(this).data('user');
+
+            // ดึงค่าจาก input field ชื่อ name, email และ roles
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const roles = document.getElementById('roles').value;
+
+            // แสดงกล่องยืนยันการอัปเดตข้อมูลด้วย SweetAlert2
+            Swal.fire({
+                title: "ยืนยันการอัพเดทข้อมูล", // หัวข้อของกล่องยืนยัน
+                text: "คุณต้องการอัพเดทข้อมูลผู้ใช้" + name + ' ใช่หรือไม่ ?', // ข้อความแสดงชื่อผู้ใช้
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancleButtonColor: '#d33',
+                confirmButtonText: 'ยืนยัน',
+                cancleButtonColor: 'ยกเลิก',
+            }).then((result) => {
+                // ถ้าผู้ใช้กดปุ่ม "ยืนยัน"
+                if (result.isConfirmed) {
+
+                    // ส่งคำขอ AJAX ไปยัง server เพื่ออัปเดตข้อมูลผู้ใช้
+                    $.ajax({
+                        type: "put", // ใช้เมธอด PUT ตาม REST API
+                        url: "{{ route('user.update') }}", // เส้นทางสำหรับอัปเดตข้อมูลผู้ใช้
+                        data: {
+                            name: name, // ชื่อผู้ใช้
+                            email: email, // อีเมลผู้ใช้
+                            roles_id: roles, // ID ของบทบาทผู้ใช้
+                            userId: userId, // ID ของผู้ใช้ที่ต้องการอัปเดต
+                        },
+                        dataType: 'JSON', // กำหนดรูปแบบข้อมูลที่ส่งกลับมา
+                        headers: {}, // ส่วนหัวของ request (ยังว่างไว้)
+
+                        // ก่อนส่งคำขอ: ใส่ Authorization Token
+                        beforeSend: function(xhr) {
+                            const bearerToken = "{{ env('TOKEN_API') }}"; // ดึง token จาก .env
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + bearerToken); // ใส่ token ลงใน header
+                        },
+
+                        // ถ้า server ตอบกลับสำเร็จ
+                        success: function(response) {
+                            if (response.code == 200) {
+                                // แสดงข้อความสำเร็จด้วย SweetAlert2
+                                Swal.fire({
+                                    title: response.message, // หัวข้อแสดงข้อความจาก server
+                                    text: "ข้อมูลผู้ใช้" + name + ' ได้รับการอัพเดทแล้ว ?', // ข้อความยืนยัน
+                                    icon: "success", // แสดงไอคอนสำเร็จ
+                                });
+                                list_table.clear().draw(); // ล้างตารางข้อมูลแล้วโหลดใหม่ (เช่น DataTables)
+                            } else {
+                                // แสดงข้อความเมื่อเกิดข้อผิดพลาด
+                                Swal.fire({
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: response.message,
+                                    icon: "error",
+                                    confirmButtonText: 'ตกลง',
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+        });
+
+
+        // $(document).on('click', '.btn-sm-update', function() {
+        //     var userId = $(this).data('id'); // ID ของผู้ใช้
+        //     var name = $('#name').val();
+        //     var email = $('#email').val();
+        //     var roleId = $('#roles').val();
+
+        //     $.ajax({
+        //         url: `/users/${userId}`, // แก้ตาม route update ของคุณ เช่น route('users.update', userId)
+        //         type: 'PUT', // หรือ 'PATCH' แล้วแต่ Laravel route คุณกำหนด
+        //         data: {
+        //             name: name,
+        //             email: email,
+        //             roles_id: roleId,
+        //             _token: '{{ csrf_token() }}' // สำคัญ! สำหรับ Laravel
+        //         },
+        //         success: function(response) {
+        //             // ซ่อน modal
+        //             $('#modal-view').hide();
+
+        //             // รีเฟรชตาราง
+        //             $('#table-users').DataTable().ajax.reload(null, false);
+
+        //             // แสดง SweetAlert สำหรับการอัพเดทสำเร็จ
+        //             Swal.fire({
+        //                 title: 'อัพเดทข้อมูลสำเร็จ',
+        //                 text: 'ข้อมูลผู้ใช้ ' + name + ' ได้รับการอัพเดทแล้ว!',
+        //                 icon: 'success',
+        //                 confirmButtonText: 'ตกลง'
+        //             });
+        //         },
+        //         error: function(xhr) {
+        //             if (xhr.status !== 200) {
+        //                 var response = xhr.responseJSON || xhr.responseText;
+        //                 console.log(response);
+
+        //                 // แสดง SweetAlert สำหรับข้อผิดพลาด
+        //                 Swal.fire({
+        //                     title: 'เกิดข้อผิดพลาด',
+        //                     text: response.message || 'ไม่สามารถอัพเดทข้อมูลได้',
+        //                     icon: 'error',
+        //                     confirmButtonText: 'ตกลง'
+        //                 });
+        //             } else {
+        //                 Swal.fire({
+        //                     title: 'อัพเดทข้อมูลสำเร็จ',
+        //                     text: 'ข้อมูลผู้ใช้ ' + name + ' ได้รับการอัพเดทแล้ว!',
+        //                     icon: 'success',
+        //                     confirmButtonText: 'ตกลง'
+        //                 });
+        //             }
+        //         }
+        //     });
+        // });
+
+
+        $(document).on('click', '.btn-delete', function() {
+            console.log("ปุ่มลบถูกคลิก");
+            // ดึงข้อมูลของแถว (row) ในตารางที่ปุ่ม (this) ถูกคลิกอยู่ภายในแถวนั้น
+            var row = list_table.row($(this).parents('tr')).data();
+
+            // ดึงค่า id ของผู้ใช้จากข้อมูลของแถวนั้น แล้วเก็บไว้ในตัวแปร userId
+            var userId = row.id;
+
+
+            Swal.fire({
+                title: "ยืนยันการลบข้อมูล",
+                text: "คุณต้องการลบข้อมูลผู้ใช้" + userId + ' ใช่หรือไม่ ?',
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancleButtonColor: '#d33',
+                confirmButtonText: 'ยืนยัน',
+                cancleButtonColor: 'ยกเลิก',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "delete",
+                        url: "{{ route('user.delete') }}",
+                        data: {
+
+                            userId: userId,
+                        },
+                        dataType: 'JSON',
+                        headers: {
+
+                        },
+                        beforeSend: function(xhr) {
+                            const bearerToken = "{{ env('TOKEN_API') }}";
+                            xhr.setRequestHeader('Authorization',
+                                'Bearer ' + bearerToken);
+                        },
+                        success: function(response) {
+                            if (response.code == 200) {
+                                Swal.fire({
+
+                                    title: response.message,
+                                    text: "ข้อมูลผู้ใช้" +
+                                        userId + ' ได้รับการลบแล้ว ?',
+                                    icon: "success",
+                                });
+                                list_table.clear().draw();
+                            } else {
+                                Swal.fire({
+
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: response.message,
+                                    icon: "error",
+                                    confirmButtonText: 'ตกลง',
+                                });
+                            }
+                        }
+                    })
+                }
+            });
+        });
+
+        $(document).on('click', '#modal-view button', function() {
+            $('#modal-view').hide();
+        });
+
+    });
+</script>
 @endscript

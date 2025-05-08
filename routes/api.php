@@ -13,20 +13,32 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "api" middleware group. Make something great!
 |
-*/
 
+*/
+// Route สำหรับ API ที่เกี่ยวข้องกับ User
+
+//ระบุว่าเส้นทางนี้ต้องการการตรวจสอบสิทธิ์โดยใช้ Sanctum 
+//get('/user'): สร้างเส้นทาง GET เพื่อดึงข้อมูลผู้ใช้ที่ได้รับการยืนยัน
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+
+
+    //$request->user(): คืนค่าข้อมูลของผู้ใช้ที่ทำการ authenticate ผ่าน Sanctum
     return $request->user();
 });
 
+//กำหนดว่าเส้นทางในกลุ่มนี้จะต้องผ่าน middleware auth:sanctum และ api
+//Route::group หมายถึงการจัดกลุ่ม Route ที่มีลักษณะการทำงานหรือเงื่อนไขที่เหมือนกันไว้ในกลุ่มเดียวกัน
 Route::group(['middleware' => ['api', 'auth:sanctum']], function () {
+
+    //Route POST /userById: เมื่อมีการส่งคำขอ POST มาที่ /userById จะเรียกใช้ฟังก์ชัน 
+    //userById ใน UserController เพื่อดึงข้อมูลของผู้ใช้จากฐานข้อมูลโดยใช้ ID ของผู้ใช้
     Route::post(
         '/userById',
         [
             \App\Http\Controllers\APIs\UserController::class,
             'userById'
         ]
-    )->name('user.by.id');
+    )->name('user.by.id'); //name('user.by.id'): ตั้งชื่อให้กับ route นี้เพื่อใช้ในที่อื่น ๆ
 
     Route::post(
         '/userWithDatatable',
@@ -52,14 +64,9 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function () {
             'deleteApi'
         ]
     )->name('user.delete');
-
-
-    // Route::put('api/users/${userId}', [UserController::class, 'updateApi'])->name('user.update');
-    // Route::middleware('api')->put('/users/update', [UserController::class, 'updateApi']);
-
 });
 
-// Route::get('dish', [DishController::class, 'index'])->name('dish.index');
+
 
 
 
@@ -102,5 +109,3 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function () {
         ]
     )->name('dish.delete');
 });
-
-
